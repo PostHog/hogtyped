@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HogTyped Browser Example - Generated Wrapper</title>
+</head>
+<body>
+  <h1>HogTyped Browser Example</h1>
+  <p>Using the GENERATED wrapper - schemas are baked into the code!</p>
+  <p>Open the console to see the events being tracked</p>
+
+  <button id="valid-event">Send Valid Event</button>
+  <button id="invalid-event">Send Invalid Event (see console)</button>
+  <button id="feature-event">Track Feature Usage</button>
+
+  <!--
+    Step 1: Generate your wrapper during build:
+    npx hogtyped generate -o dist/posthog.generated.js
+
+    Step 2: Include the generated file (contains everything!)
+  -->
+  <script src="https://unpkg.com/posthog-js@latest/dist/posthog.js"></script>
+  <script type="module">
+    // Import the generated wrapper - schemas are already embedded!
+    // No network requests, no async loading, instant validation
+    import { posthog } from './dist/posthog.generated.js';
+
+    // Valid event
+    document.getElementById('valid-event').addEventListener('click', () => {
+      posthog.capture('user_signed_up', {
+        userId: 'user-' + Date.now(),
+        email: 'user@example.com',
+        plan: 'growth'
+      });
+      console.log('✅ Valid event sent');
+    });
+
+    // Invalid event (will show validation error)
+    document.getElementById('invalid-event').addEventListener('click', () => {
+      try {
+        posthog.capture('user_signed_up', {
+          userId: 'user-' + Date.now(),
+          email: 'not-an-email', // Invalid!
+          plan: 'invalid-plan'    // Invalid!
+        });
+      } catch (error) {
+        console.error('❌ Validation failed:', error.message);
+      }
+    });
+
+    // Feature tracking
+    document.getElementById('feature-event').addEventListener('click', () => {
+      posthog.capture('feature_used', {
+        featureName: 'button_click',
+        featureArea: 'dashboard'
+      });
+      console.log('📊 Feature event sent');
+    });
+
+    // Other PostHog features work normally
+    posthog.identify('browser-user-123');
+    console.log('User identified');
+
+    // Show benefits in console
+    console.log(`
+    🚀 Benefits of Generated Wrapper:
+    - No schema loading from network
+    - Instant validation (schemas embedded)
+    - Smaller total size (no loader code)
+    - Works offline
+    - Type-safe in TypeScript projects
+    `);
+  </script>
+</body>
+</html>

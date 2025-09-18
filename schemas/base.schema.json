@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://posthog.com/schemas/base.schema.json",
+  "title": "PostHog Base Event Schema",
+  "definitions": {
+    "BaseEvent": {
+      "type": "object",
+      "properties": {
+        "$distinct_id": {
+          "type": "string",
+          "description": "The distinct ID of the user"
+        },
+        "$timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the event occurred"
+        },
+        "$device_id": {
+          "type": "string",
+          "description": "Device identifier"
+        },
+        "$session_id": {
+          "type": "string",
+          "description": "Session identifier"
+        },
+        "$window_id": {
+          "type": "string",
+          "description": "Window/tab identifier"
+        },
+        "$referrer": {
+          "type": "string",
+          "format": "uri",
+          "description": "Referring URL"
+        },
+        "$referring_domain": {
+          "type": "string",
+          "description": "Referring domain"
+        },
+        "$current_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Current page URL"
+        },
+        "$host": {
+          "type": "string",
+          "description": "Current host"
+        },
+        "$pathname": {
+          "type": "string",
+          "description": "Current pathname"
+        },
+        "$screen_height": {
+          "type": "integer",
+          "description": "Screen height in pixels"
+        },
+        "$screen_width": {
+          "type": "integer",
+          "description": "Screen width in pixels"
+        },
+        "$viewport_height": {
+          "type": "integer",
+          "description": "Viewport height in pixels"
+        },
+        "$viewport_width": {
+          "type": "integer",
+          "description": "Viewport width in pixels"
+        },
+        "$lib": {
+          "type": "string",
+          "description": "Library used to send event"
+        },
+        "$lib_version": {
+          "type": "string",
+          "description": "Library version"
+        },
+        "$os": {
+          "type": "string",
+          "description": "Operating system"
+        },
+        "$browser": {
+          "type": "string",
+          "description": "Browser name"
+        },
+        "$browser_version": {
+          "type": "string",
+          "description": "Browser version"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

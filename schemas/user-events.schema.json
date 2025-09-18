@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://posthog.com/schemas/user-events.schema.json",
+  "title": "User Custom Event Schemas",
+  "description": "Define your custom event schemas here",
+  "definitions": {
+    "UserSignedUp": {
+      "allOf": [
+        { "$ref": "./base.schema.json#/definitions/BaseEvent" },
+        {
+          "type": "object",
+          "properties": {
+            "userId": {
+              "type": "string",
+              "description": "User ID"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "plan": {
+              "type": "string",
+              "enum": ["free", "starter", "growth", "enterprise"]
+            },
+            "signupMethod": {
+              "type": "string",
+              "enum": ["email", "google", "github", "saml"]
+            }
+          },
+          "required": ["userId", "email", "plan"]
+        }
+      ]
+    },
+    "FeatureUsed": {
+      "allOf": [
+        { "$ref": "./base.schema.json#/definitions/BaseEvent" },
+        {
+          "type": "object",
+          "properties": {
+            "featureName": {
+              "type": "string"
+            },
+            "featureArea": {
+              "type": "string",
+              "enum": ["dashboard", "insights", "recordings", "feature-flags", "experiments"]
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["featureName"]
+        }
+      ]
+    },
+    "PurchaseCompleted": {
+      "allOf": [
+        { "$ref": "./base.schema.json#/definitions/BaseEvent" },
+        {
+          "type": "object",
+          "properties": {
+            "orderId": {
+              "type": "string"
+            },
+            "revenue": {
+              "type": "number",
+              "minimum": 0
+            },
+            "currency": {
+              "type": "string",
+              "pattern": "^[A-Z]{3}$"
+            },
+            "products": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "productId": { "type": "string" },
+                  "name": { "type": "string" },
+                  "price": { "type": "number", "minimum": 0 },
+                  "quantity": { "type": "integer", "minimum": 1 }
+                },
+                "required": ["productId", "price", "quantity"]
+              }
+            }
+          },
+          "required": ["orderId", "revenue", "currency"]
+        }
+      ]
+    }
+  },
+  "events": {
+    "$identify": {
+      "allOf": [
+        { "$ref": "./base.schema.json#/definitions/BaseEvent" },
+        {
+          "type": "object",
+          "properties": {
+            "$set": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "$set_once": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      ]
+    },
+    "$pageview": {
+      "$ref": "./base.schema.json#/definitions/BaseEvent"
+    },
+    "$autocapture": {
+      "$ref": "./base.schema.json#/definitions/BaseEvent"
+    },
+    "user_signed_up": {
+      "$ref": "#/definitions/UserSignedUp"
+    },
+    "feature_used": {
+      "$ref": "#/definitions/FeatureUsed"
+    },
+    "purchase_completed": {
+      "$ref": "#/definitions/PurchaseCompleted"
+    }
+  }
+}

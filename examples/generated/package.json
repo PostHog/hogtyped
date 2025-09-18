@@ -1,0 +1,17 @@
+{
+  "name": "hogtyped-generated-example",
+  "version": "1.0.0",
+  "scripts": {
+    "generate": "hogtyped generate",
+    "prebuild": "npm run generate",
+    "build": "tsc",
+    "dev": "npm run generate && node dist/app.js"
+  },
+  "dependencies": {
+    "hogtyped": "file:../../packages/js",
+    "posthog-js": "^1.96.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

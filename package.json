@@ -1,0 +1,11 @@
+{
+  "name": "hogtyped-monorepo",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:js && npm run test:python",
+    "test:js": "cd packages/js && npm test",
+    "test:python": "cd packages/python && python -m pytest",
+    "build": "cd packages/js && npm run build",
+    "lint": "cd packages/js && npm run lint"
+  }
+}

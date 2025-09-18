@@ -1,0 +1,6 @@
+# Generated files
+src/posthog.generated.ts
+dist/
+
+# Dependencies
+node_modules/

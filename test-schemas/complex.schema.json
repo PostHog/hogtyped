@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ComplexEvent": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "active", "completed", "cancelled"]
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nested": {
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "integer"
+            },
+            "data": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "number" },
+                "label": { "type": "string" }
+              },
+              "required": ["value"]
+            }
+          }
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "status"]
+    }
+  },
+  "events": {
+    "complex_event": { "$ref": "#/definitions/ComplexEvent" }
+  }
+}

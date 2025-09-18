@@ -1,0 +1,135 @@
+name: 🐛 Bug Report
+description: Report a bug in HogTyped
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this issue!
+
+  - type: dropdown
+    id: package
+    attributes:
+      label: Which package is affected?
+      options:
+        - TypeScript/JavaScript (hogtyped npm package)
+        - Python (hogtyped PyPI package)
+        - Both
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: |
+        When I run `npx hogtyped generate`, I get an error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior
+      value: |
+        1. Create a schema file with...
+        2. Run command...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: schema
+    attributes:
+      label: Schema Example
+      description: If relevant, provide the schema that causes the issue
+      render: json
+      placeholder: |
+        {
+          "events": {
+            "my_event": {
+              "type": "object",
+              "properties": {
+                "field": { "type": "string" }
+              }
+            }
+          }
+        }
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error Output
+      description: Any error messages or stack traces
+      render: shell
+
+  - type: input
+    id: version
+    attributes:
+      label: HogTyped Version
+      description: What version of HogTyped are you using?
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: node-version
+    attributes:
+      label: Node.js Version (if applicable)
+      options:
+        - "16"
+        - "18"
+        - "20"
+        - "Other"
+        - "N/A"
+
+  - type: dropdown
+    id: python-version
+    attributes:
+      label: Python Version (if applicable)
+      options:
+        - "3.7"
+        - "3.8"
+        - "3.9"
+        - "3.10"
+        - "3.11"
+        - "3.12"
+        - "Other"
+        - "N/A"
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here

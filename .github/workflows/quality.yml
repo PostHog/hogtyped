@@ -1,0 +1,127 @@
+name: Code Quality
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  # Check code formatting
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install formatters
+        run: |
+          # TypeScript/JavaScript
+          npm install -g prettier
+
+          # Python
+          pip install black isort
+
+      - name: Check TypeScript formatting
+        run: |
+          cd packages/js
+          npx prettier --check "src/**/*.{ts,js,json}"
+
+      - name: Check Python formatting
+        run: |
+          cd packages/python
+          black --check hogtyped/
+          isort --check-only hogtyped/
+
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          languages: javascript, python
+
+      - name: Run npm audit
+        run: |
+          cd packages/js
+          npm audit --production || true
+
+      - name: Run pip audit
+        run: |
+          pip install pip-audit
+          cd packages/python
+          pip-audit || true
+
+  # Check for common issues
+  lint-pr:
+    name: Lint PR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check commit messages
+        uses: wagoid/commitlint-github-action@v5
+
+      - name: Check PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for large files
+        run: |
+          # Fail if any file is larger than 1MB
+          find . -type f -size +1M -exec ls -lh {} \; | tee /tmp/large_files.txt
+          if [ -s /tmp/large_files.txt ]; then
+            echo "❌ Large files detected:"
+            cat /tmp/large_files.txt
+            exit 1
+          fi
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.pull_request.base.sha }}
+          head: ${{ github.event.pull_request.head.sha }}
+
+  # Documentation check
+  docs-check:
+    name: Documentation Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for broken links in markdown
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          config-file: '.github/markdown-link-check.json'
+          folder-path: '.'
+          file-extension: '.md'
+
+      - name: Check README examples are up to date
+        run: |
+          # Ensure examples in README match actual API
+          grep -q "npx hogtyped generate" README.md || echo "⚠️ README missing TypeScript example"
+          grep -q "python -m hogtyped generate" README.md || echo "⚠️ README missing Python example"
