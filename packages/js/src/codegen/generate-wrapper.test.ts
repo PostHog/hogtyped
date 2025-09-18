@@ -233,13 +233,10 @@ describe('TypeScript Code Generator', () => {
 
       const generatedCode = fs.readFileSync(outputFile, 'utf-8');
 
-      // Check for typed capture overloads
-      expect(generatedCode).toContain('capture<K extends EventName>');
+      // Check for typed capture method with conditional types
+      expect(generatedCode).toContain('capture<K extends EventName | string = string>');
       expect(generatedCode).toContain('eventName: K');
-      expect(generatedCode).toContain('properties: EventMap[K]');
-
-      // Check for fallback capture
-      expect(generatedCode).toContain('capture(eventName: string, properties?: any): void');
+      expect(generatedCode).toContain('K extends EventName ? EventMap[K] : any');
     });
 
     test('should include PostHog API compatibility methods', async () => {

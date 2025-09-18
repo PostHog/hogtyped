@@ -289,6 +289,9 @@ class {class_name}:
         # Validators are embedded - no runtime loading needed!
         self.schemas = SCHEMAS
 
+        # Expose the underlying posthog instance for advanced usage
+        self.posthog = posthog
+
     def _validate(self, event_name: str, properties: Dict[str, Any]) -> Optional[List[str]]:
         """Validate event properties against schema."""
         if self.validation_mode == ValidationMode.DISABLED:

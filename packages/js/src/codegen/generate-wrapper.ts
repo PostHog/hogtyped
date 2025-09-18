@@ -171,6 +171,23 @@ export class ${className} {
   }
 
   /**
+   * Get the underlying posthog-js instance for advanced usage
+   *
+   * @example
+   * // Access session replay
+   * hogtyped.posthog.startSessionRecording();
+   *
+   * // Access feature flags directly
+   * const flags = hogtyped.posthog.getAllFlags();
+   *
+   * // Any other posthog-js functionality
+   * hogtyped.posthog.debug();
+   */
+  get posthog() {
+    return this.posthogInstance;
+  }
+
+  /**
    * Capture an event with full type safety and compile-time checking
    */
   capture<K extends EventName | string = string>(
