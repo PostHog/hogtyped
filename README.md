@@ -10,7 +10,7 @@ Code generation tool that creates type-safe PostHog wrappers with embedded JSON 
 Generate custom analytics libraries for TypeScript and Python with zero runtime overhead.
 
 ## 🚧 Experimental 🚧
-This is literally hot off the press and may have a few rough edges. Please report any issues you encounter!
+This is literally hot off the press, is an experiment, and will have rough edges. Please report any issues you encounter!
 
 ## Features
 
