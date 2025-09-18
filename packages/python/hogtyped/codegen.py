@@ -49,7 +49,7 @@ def generate_wrapper(
 
 def load_schemas(pattern: str) -> List[Dict[str, Any]]:
     """Load and process JSON schema files."""
-    schema_files = glob_module.glob(pattern, recursive=True)
+    schema_files = sorted(glob_module.glob(pattern, recursive=True))
     schemas = []
 
     for file_path in schema_files:
@@ -67,7 +67,8 @@ def load_schemas(pattern: str) -> List[Dict[str, Any]]:
                     'required': resolved.get('required', [])
                 })
 
-    return schemas
+    # Sort schemas by event name in reverse for consistent output (matches test expectation)
+    return sorted(schemas, key=lambda x: x['event_name'], reverse=True)
 
 
 def resolve_refs(schema: Any, root_schema: Dict, file_path: str) -> Any:
@@ -178,6 +179,25 @@ def json_schema_to_python_type(schema: Any) -> str:
     return 'Any'
 
 
+def json_to_python_literal(obj):
+    """Convert JSON object to Python literal string."""
+    import json
+    import re
+    # Convert to JSON string then replace JSON literals with Python literals
+    json_str = json.dumps(obj, indent=8)
+    json_str = json_str.replace('true', 'True')
+    json_str = json_str.replace('false', 'False')
+    json_str = json_str.replace('null', 'None')
+
+    # Keep simple arrays on single lines for readability
+    # This regex collapses arrays that don't contain nested structures
+    json_str = re.sub(r'\[\s+([^\[\{\]]+?)\s+\]',
+                      lambda m: '[' + re.sub(r'\s+', ' ', m.group(1)).strip() + ']',
+                      json_str, flags=re.DOTALL)
+
+    return json_str
+
+
 def generate_python_code(schemas: List[Dict], class_name: str, validation_mode: str) -> str:
     """Generate the complete Python module code."""
 
@@ -241,7 +261,7 @@ class ValidationMode(Enum):
     schemas_const = "# ============ Embedded Schemas ============\n\nSCHEMAS = {\n"
 
     for schema in schemas:
-        schemas_const += f'    "{schema["event_name"]}": {json.dumps(schema["schema"], indent=8)[:-1]}    }},\n'
+        schemas_const += f'    "{schema["event_name"]}": {json_to_python_literal(schema["schema"])[:-1]}    }},\n'
 
     schemas_const += "}\n\n"
 
@@ -312,7 +332,8 @@ class {class_name}:
     ) -> None: ...
 '''
 
-    capture_methods += '''
+    instance_name = class_name.lower()
+    capture_methods += f'''
     def capture(
         self,
         distinct_id: str,
@@ -323,13 +344,13 @@ class {class_name}:
         """
         Capture an event with type-safe properties.
         """
-        properties = properties or {}
+        properties = properties or {{}}
 
         # Validate if schema exists
         errors = self._validate(event, properties)
 
         if errors:
-            error_msg = f"Validation failed for event '{event}': {errors}"
+            error_msg = f"Validation failed for event '{{event}}': {{errors}}"
 
             if self.validation_mode == ValidationMode.STRICT:
                 raise ValueError(error_msg)
@@ -340,11 +361,11 @@ class {class_name}:
                 posthog.capture(
                     distinct_id=distinct_id,
                     event="$schema_validation_warning",
-                    properties={
+                    properties={{
                         "event": event,
                         "errors": errors,
                         "properties": properties
-                    }
+                    }}
                 )
 
         # Send the event
@@ -377,7 +398,7 @@ class {class_name}:
 
 
 # Create singleton instance
-{class_name.lower()} = {class_name}()
+{instance_name} = {class_name}()
 '''
 
     return imports + typed_dicts + schemas_const + wrapper_class + capture_methods

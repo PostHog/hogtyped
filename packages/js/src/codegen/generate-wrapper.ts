@@ -100,7 +100,16 @@ function generateSchemaConstants(schemas: SchemaInfo[]): string {
 
   for (const schema of schemas) {
     // Embed the full JSON schema for validation
-    code += `  '${schema.eventName}': ${JSON.stringify(schema.schema, null, 2).split('\n').join('\n  ')},\n`;
+    const schemaJson = JSON.stringify(schema.schema, null, 2);
+    // Keep simple arrays on single lines for readability
+    const formattedJson = schemaJson.replace(/\[\s+([^\[\]]+?)\s+\]/gs, (match, content) => {
+      // Only collapse simple arrays (no nested structures)
+      if (!content.includes('{') && !content.includes('[')) {
+        return '[' + content.replace(/\s+/g, ' ').trim() + ']';
+      }
+      return match;
+    });
+    code += `  "${schema.eventName}": ${formattedJson.split('\n').join('\n  ')},\n`;
   }
 
   code += '} as const;\n\n';
@@ -199,7 +208,7 @@ export class ${className} {
   }
 
   isFeatureEnabled(key: string, options?: any): boolean {
-    return this.posthogInstance.isFeatureEnabled(key, options);
+    return this.posthogInstance.isFeatureEnabled(key, options) || false;
   }
 
   setPersonProperties(properties: any): void {
@@ -225,9 +234,9 @@ function generateValidatorInitialization(schemas: SchemaInfo[]): string {
   let code = '';
 
   for (const schema of schemas) {
-    code += `    this.validators.set('${schema.eventName}', (data: any) => {
+    code += `    this.validators.set("${schema.eventName}", (data: any) => {
       const errors: any[] = [];
-      const schema = SCHEMAS['${schema.eventName}'];
+      const schema = SCHEMAS["${schema.eventName}"];
 
       // Check required fields
       ${schema.required.map(field => `

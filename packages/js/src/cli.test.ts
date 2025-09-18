@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as os from 'os';
 
 describe('CLI Tool', () => {
-  const cliPath = path.join(__dirname, '../../bin/hogtyped.js');
+  const cliPath = path.join(__dirname, '../bin/hogtyped.js');
   let tempDir: string;
 
   beforeEach(() => {

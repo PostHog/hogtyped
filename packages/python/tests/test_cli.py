@@ -168,7 +168,6 @@ class TestPythonCLI:
         )
 
         # Try to import the generated module
-        import sys
         sys.path.insert(0, str(self.test_output_dir))
 
         try:

@@ -61,20 +61,26 @@ describe('TypeScript Code Generator', () => {
           esModuleInterop: true,
           skipLibCheck: true,
           forceConsistentCasingInFileNames: true,
-          noEmit: true
-        }
+          noEmit: true,
+          moduleResolution: 'node'
+        },
+        include: ['*.ts']
       };
 
       const tsConfigPath = path.join(outputDir, 'tsconfig.test.json');
       fs.writeFileSync(tsConfigPath, JSON.stringify(tsConfig, null, 2));
 
       // This will throw if TypeScript compilation fails
-      expect(() => {
+      try {
         execSync(`npx tsc -p ${tsConfigPath}`, {
           cwd: outputDir,
           stdio: 'pipe'
         });
-      }).not.toThrow();
+      } catch (error: any) {
+        // If it fails, show the actual TypeScript error for debugging
+        console.error('TypeScript compilation error:', error.stderr?.toString() || error.stdout?.toString());
+        throw error;
+      }
     });
   });
 
