@@ -35,7 +35,25 @@ export async function generateWrapper(options: {
 // Generated at: ${new Date().toISOString()}
 // DO NOT EDIT - This file is auto-generated
 
-import posthog from 'posthog-js';
+// Dynamic import for SSR compatibility
+let posthog: any;
+if (typeof window !== 'undefined') {
+  // Client-side only
+  posthog = require('posthog-js').default;
+} else {
+  // Server-side: create a mock
+  posthog = {
+    init: () => {},
+    capture: () => {},
+    identify: () => {},
+    alias: () => {},
+    getFeatureFlag: () => undefined,
+    isFeatureEnabled: () => false,
+    setPersonProperties: () => {},
+    group: () => {},
+    reset: () => {}
+  };
+}
 
 ${generateTypes(schemas)}
 
@@ -43,9 +61,11 @@ ${generateSchemaConstants(schemas)}
 
 ${generateWrapperClass(className, schemas, options.validationMode)}
 
-// Export singleton instance
-export const ${className.toLowerCase()} = new ${className}();
-export default ${className.toLowerCase()};
+// Export singleton instance with consistent name to avoid collisions
+export const hogtyped = new ${className}();
+
+// Default export is the singleton instance
+export default hogtyped;
 `;
 
   // Ensure output directory exists
@@ -125,19 +145,25 @@ export class ${className} {
   private posthogInstance: typeof posthog;
   private validationMode: 'strict' | 'warning' | 'disabled';
   private validators: Map<string, (data: any) => { valid: boolean; errors?: any[] }> = new Map();
+  private initialized = false;
 
-  constructor(apiKey?: string, options?: any) {
-    this.validationMode = options?.validationMode || '${validationMode || 'warning'}';
-
-    if (apiKey) {
-      this.posthogInstance = posthog;
-      posthog.init(apiKey, options);
-    } else {
-      this.posthogInstance = posthog;
-    }
+  constructor() {
+    this.validationMode = '${validationMode || 'warning'}';
+    this.posthogInstance = posthog;
 
     // Compile validators at initialization (happens once)
     this.initializeValidators();
+  }
+
+  /**
+   * Initialize PostHog with your API key
+   * @param apiKey - Your PostHog API key
+   * @param options - PostHog configuration options
+   */
+  init(apiKey: string, options?: any): void {
+    this.validationMode = options?.validationMode || this.validationMode;
+    posthog.init(apiKey, options);
+    this.initialized = true;
   }
 
   private initializeValidators() {

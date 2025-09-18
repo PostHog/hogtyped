@@ -432,6 +432,142 @@ See the `/examples` directory for:
 - Custom validation handlers
 - Multi-schema organization
 
+## Development & Testing
+
+### Testing Locally Without Publishing
+
+#### JavaScript/TypeScript
+
+**Method 1: npm link (Recommended for CLI testing)**
+```bash
+# In the package directory
+cd packages/js
+npm link
+
+# Now you can use the CLI globally
+hogtyped init
+hogtyped generate
+
+# To unlink when done
+npm unlink -g hogtyped
+```
+
+**Method 2: Direct execution**
+```bash
+# Build the package first
+cd packages/js
+npm run build
+
+# Run the CLI directly
+node ./bin/hogtyped.js init
+node ./bin/hogtyped.js generate
+```
+
+**Method 3: Install from local path**
+```bash
+# In your test project
+npm install ../path/to/hogtyped/packages/js
+
+# Use in your code
+import { generateWrapper } from 'hogtyped';
+```
+
+**Method 4: npm pack (Test the actual package)**
+```bash
+# In packages/js
+npm pack  # Creates hogtyped-0.1.0.tgz
+
+# In your test project
+npm install ../path/to/hogtyped-0.1.0.tgz
+```
+
+#### Python
+
+**Method 1: pip install in editable mode**
+```bash
+# In your test project with virtual environment activated
+pip install -e /path/to/hogtyped/packages/python
+
+# Now you can use it
+python -m hogtyped init
+python -m hogtyped generate
+
+# Or in Python code
+from hogtyped import generate_wrapper
+```
+
+**Method 2: Direct execution**
+```bash
+# Run directly from source
+cd packages/python
+python -m hogtyped init
+python -m hogtyped generate
+```
+
+**Method 3: Build and install wheel**
+```bash
+# In packages/python
+python -m build  # Creates dist/hogtyped-0.1.0-py3-none-any.whl
+
+# In your test project
+pip install /path/to/hogtyped/packages/python/dist/hogtyped-0.1.0-py3-none-any.whl
+```
+
+### Running Tests
+
+```bash
+# Run all tests (from monorepo root)
+npm test
+
+# JavaScript tests only
+cd packages/js && npm test
+
+# Python tests only
+cd packages/python
+uv venv && source .venv/bin/activate
+uv pip install -e ".[dev]"
+python -m pytest
+
+# Watch mode for JavaScript
+cd packages/js && npm run test:watch
+```
+
+### Example Test Project
+
+Create a test project to try out HogTyped:
+
+```bash
+# Create test directory
+mkdir test-hogtyped && cd test-hogtyped
+
+# Create a simple schema
+mkdir schemas
+cat > schemas/events.schema.json << 'EOF'
+{
+  "events": {
+    "button_clicked": {
+      "type": "object",
+      "properties": {
+        "button_id": { "type": "string" },
+        "page": { "type": "string" }
+      },
+      "required": ["button_id"]
+    }
+  }
+}
+EOF
+
+# For TypeScript
+npx /path/to/hogtyped/packages/js/bin/hogtyped.js generate
+
+# For Python
+python /path/to/hogtyped/packages/python/hogtyped generate
+
+# Check the generated files
+cat src/posthog.generated.ts  # TypeScript
+cat posthog_generated.py      # Python
+```
+
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).

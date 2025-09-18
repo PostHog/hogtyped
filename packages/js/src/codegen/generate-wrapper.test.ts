@@ -221,8 +221,8 @@ describe('TypeScript Code Generator', () => {
       const generatedCode = fs.readFileSync(outputFile, 'utf-8');
 
       expect(generatedCode).toContain('export class CustomAnalytics');
-      expect(generatedCode).toContain('export const customanalytics = new CustomAnalytics()');
-      expect(generatedCode).toContain('export default customanalytics');
+      expect(generatedCode).toContain('export const hogtyped = new CustomAnalytics()');
+      expect(generatedCode).toContain('export default hogtyped');
     });
 
     test('should generate capture method with overloads', async () => {

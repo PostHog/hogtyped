@@ -236,7 +236,7 @@ class TestPythonCodeGenerator:
         generated_code = output_file.read_text()
 
         assert "class CustomAnalytics:" in generated_code
-        assert "customanalytics = CustomAnalytics()" in generated_code
+        assert "hogtyped = CustomAnalytics()" in generated_code
 
     def test_capture_method_overloads(self):
         """Test that capture method has type overloads"""

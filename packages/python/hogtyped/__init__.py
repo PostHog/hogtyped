@@ -12,9 +12,9 @@ Usage:
 Example:
     python -m hogtyped generate
 
-    from posthog_generated import posthog
+    from posthog_generated import hogtyped
 
-    posthog.capture(
+    hogtyped.capture(
         distinct_id="user-123",
         event="user_signed_up",
         properties={

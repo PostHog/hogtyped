@@ -30,9 +30,11 @@ program
 
       console.log('\n📝 Next steps:');
       console.log(`1. Import your generated wrapper:`);
-      console.log(`   import { ${options.class.toLowerCase()} } from '${options.output.replace('.ts', '')}';`);
-      console.log('\n2. Use it with full type safety:');
-      console.log(`   ${options.class.toLowerCase()}.capture('event_name', { /* autocomplete! */ });`);
+      console.log(`   import hogtyped from '${options.output.replace('.ts', '')}';`);
+      console.log('\n2. Initialize with your API key:');
+      console.log(`   hogtyped.init('your-api-key');`);
+      console.log('\n3. Use it with full type safety:');
+      console.log(`   hogtyped.capture('event_name', { /* autocomplete! */ });`);
     } catch (error) {
       console.error('❌ Error generating wrapper:', error.message);
       process.exit(1);

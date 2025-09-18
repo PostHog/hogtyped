@@ -332,7 +332,6 @@ class {class_name}:
     ) -> None: ...
 '''
 
-    instance_name = class_name.lower()
     capture_methods += f'''
     def capture(
         self,
@@ -397,8 +396,8 @@ class {class_name}:
         posthog.shutdown()
 
 
-# Create singleton instance
-{instance_name} = {class_name}()
+# Create singleton instance with consistent name to avoid collisions
+hogtyped = {class_name}()
 '''
 
     return imports + typed_dicts + schemas_const + wrapper_class + capture_methods
