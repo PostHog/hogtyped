@@ -278,19 +278,27 @@ class {class_name}:
         api_key: Optional[str] = None,
         host: str = "https://app.posthog.com",
         validation_mode: ValidationMode = ValidationMode.{validation_mode.upper()},
+        posthog_instance=None,
         **kwargs
     ):
         self.validation_mode = validation_mode
 
-        if api_key:
-            posthog.project_api_key = api_key
-            posthog.host = host
+        # Use provided instance or fallback to the module-level posthog
+        if posthog_instance is not None:
+            self.posthog = posthog_instance
+        else:
+            self.posthog = posthog
+            # Only init if api_key provided and using default instance
+            if api_key:
+                self.posthog.project_api_key = api_key
+                self.posthog.host = host
 
         # Validators are embedded - no runtime loading needed!
         self.schemas = SCHEMAS
 
-        # Expose the underlying posthog instance for advanced usage
-        self.posthog = posthog
+    def set_instance(self, posthog_instance) -> None:
+        """Set or update the PostHog instance."""
+        self.posthog = posthog_instance
 
     def _validate(self, event_name: str, properties: Dict[str, Any]) -> Optional[List[str]]:
         """Validate event properties against schema."""
@@ -360,7 +368,7 @@ class {class_name}:
                 warnings.warn(error_msg)
 
                 # Send validation warning event
-                posthog.capture(
+                self.posthog.capture(
                     distinct_id=distinct_id,
                     event="$schema_validation_warning",
                     properties={{
@@ -371,7 +379,7 @@ class {class_name}:
                 )
 
         # Send the event
-        posthog.capture(
+        self.posthog.capture(
             distinct_id=distinct_id,
             event=event,
             properties=properties,
@@ -380,23 +388,23 @@ class {class_name}:
 
     def identify(self, distinct_id: str, properties: Optional[Dict[str, Any]] = None, **kwargs) -> None:
         """Identify a user."""
-        posthog.identify(distinct_id=distinct_id, properties=properties, **kwargs)
+        self.posthog.identify(distinct_id=distinct_id, properties=properties, **kwargs)
 
     def alias(self, previous_id: str, distinct_id: str, **kwargs) -> None:
         """Create an alias for a user."""
-        posthog.alias(previous_id=previous_id, distinct_id=distinct_id, **kwargs)
+        self.posthog.alias(previous_id=previous_id, distinct_id=distinct_id, **kwargs)
 
     def feature_enabled(self, key: str, distinct_id: str, **kwargs) -> bool:
         """Check if a feature flag is enabled."""
-        return posthog.feature_enabled(key=key, distinct_id=distinct_id, **kwargs)
+        return self.posthog.feature_enabled(key=key, distinct_id=distinct_id, **kwargs)
 
     def get_feature_flag(self, key: str, distinct_id: str, **kwargs) -> Any:
         """Get feature flag value."""
-        return posthog.get_feature_flag(key=key, distinct_id=distinct_id, **kwargs)
+        return self.posthog.get_feature_flag(key=key, distinct_id=distinct_id, **kwargs)
 
     def shutdown(self) -> None:
         """Shutdown the PostHog client."""
-        posthog.shutdown()
+        self.posthog.shutdown()
 
 
 # Create singleton instance with consistent name to avoid collisions

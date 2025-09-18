@@ -147,9 +147,16 @@ export class ${className} {
   private validators: Map<string, (data: any) => { valid: boolean; errors?: any[] }> = new Map();
   private initialized = false;
 
-  constructor() {
+  constructor(existingInstance?: any) {
     this.validationMode = '${validationMode || 'warning'}';
-    this.posthogInstance = posthog;
+
+    // Use provided instance or fallback to the module-level posthog
+    this.posthogInstance = existingInstance || posthog;
+
+    // If an instance was provided, mark as initialized
+    if (existingInstance) {
+      this.initialized = true;
+    }
 
     // Compile validators at initialization (happens once)
     this.initializeValidators();
@@ -162,7 +169,20 @@ export class ${className} {
    */
   init(apiKey: string, options?: any): void {
     this.validationMode = options?.validationMode || this.validationMode;
-    posthog.init(apiKey, options);
+
+    // Only init if we're using the default instance
+    if (!this.initialized) {
+      this.posthogInstance.init(apiKey, options);
+      this.initialized = true;
+    }
+  }
+
+  /**
+   * Set or update the PostHog instance
+   * @param instance - Your existing PostHog instance
+   */
+  setInstance(instance: any): void {
+    this.posthogInstance = instance;
     this.initialized = true;
   }
 
