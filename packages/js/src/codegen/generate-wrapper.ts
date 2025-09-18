@@ -173,12 +173,10 @@ export class ${className} {
   /**
    * Capture an event with full type safety and compile-time checking
    */
-  capture<K extends EventName>(
+  capture<K extends EventName | string = string>(
     eventName: K,
-    properties: EventMap[K]
-  ): void;
-  capture(eventName: string, properties?: any): void;
-  capture(eventName: any, properties?: any): void {
+    properties: K extends EventName ? EventMap[K] : any
+  ): void {
     // Validate if schema exists
     const validator = this.validators.get(eventName);
 
