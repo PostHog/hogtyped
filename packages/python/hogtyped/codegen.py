@@ -220,6 +220,8 @@ def generate_python_code(schemas: List[Dict], class_name: str, validation_mode: 
 # Generated at: {timestamp}
 # DO NOT EDIT - This file is auto-generated
 
+from __future__ import annotations
+
 from typing import Any, Dict, List, Optional, Union, Literal, TypedDict, overload
 from enum import Enum
 import posthog
