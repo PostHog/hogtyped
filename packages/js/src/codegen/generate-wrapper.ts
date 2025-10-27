@@ -9,9 +9,9 @@
  * 4. Full autocomplete support
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-import { glob } from 'glob';
+import * as fs from "fs";
+import * as path from "path";
+import { glob } from "glob";
 
 interface SchemaInfo {
   eventName: string;
@@ -25,9 +25,9 @@ export async function generateWrapper(options: {
   schemas: string | string[];
   output: string;
   className?: string;
-  validationMode?: 'strict' | 'warning' | 'disabled';
+  validationMode?: "strict" | "warning" | "disabled";
 }) {
-  const className = options.className || 'MyPostHog';
+  const className = options.className || "MyPostHog";
   const schemas = await loadAndProcessSchemas(options.schemas);
 
   const code = `
@@ -82,7 +82,7 @@ export default hogtyped;
 }
 
 function generateTypes(schemas: SchemaInfo[]): string {
-  let types = '// ============ Event Types ============\n\n';
+  let types = "// ============ Event Types ============\n\n";
 
   // Generate interface for each event
   for (const schema of schemas) {
@@ -91,21 +91,23 @@ function generateTypes(schemas: SchemaInfo[]): string {
     for (const [propName, propSchema] of Object.entries(schema.properties)) {
       const isRequired = schema.required.includes(propName);
       const tsType = jsonSchemaToTsType(propSchema);
-      const description = propSchema.description ? `  /** ${propSchema.description} */\n` : '';
+      const description = propSchema.description
+        ? `  /** ${propSchema.description} */\n`
+        : "";
 
       types += description;
-      types += `  ${propName}${isRequired ? '' : '?'}: ${tsType};\n`;
+      types += `  ${propName}${isRequired ? "" : "?"}: ${tsType};\n`;
     }
 
-    types += '}\n\n';
+    types += "}\n\n";
   }
 
   // Generate event map
-  types += 'export interface EventMap {\n';
+  types += "export interface EventMap {\n";
   for (const schema of schemas) {
     types += `  '${schema.eventName}': ${schema.interfaceName};\n`;
   }
-  types += '}\n\n';
+  types += "}\n\n";
 
   // Generate event name type
   types += `export type EventName = keyof EventMap;\n\n`;
@@ -114,30 +116,37 @@ function generateTypes(schemas: SchemaInfo[]): string {
 }
 
 function generateSchemaConstants(schemas: SchemaInfo[]): string {
-  let code = '// ============ Embedded Schemas ============\n\n';
+  let code = "// ============ Embedded Schemas ============\n\n";
 
-  code += 'const SCHEMAS = {\n';
+  code += "const SCHEMAS = {\n";
 
   for (const schema of schemas) {
     // Embed the full JSON schema for validation
     const schemaJson = JSON.stringify(schema.schema, null, 2);
     // Keep simple arrays on single lines for readability
-    const formattedJson = schemaJson.replace(/\[\s+([^\[\]]+?)\s+\]/gs, (match, content) => {
-      // Only collapse simple arrays (no nested structures)
-      if (!content.includes('{') && !content.includes('[')) {
-        return '[' + content.replace(/\s+/g, ' ').trim() + ']';
-      }
-      return match;
-    });
-    code += `  "${schema.eventName}": ${formattedJson.split('\n').join('\n  ')},\n`;
+    const formattedJson = schemaJson.replace(
+      /\[\s+([^\[\]]+?)\s+\]/gs,
+      (match, content) => {
+        // Only collapse simple arrays (no nested structures)
+        if (!content.includes("{") && !content.includes("[")) {
+          return "[" + content.replace(/\s+/g, " ").trim() + "]";
+        }
+        return match;
+      },
+    );
+    code += `  "${schema.eventName}": ${formattedJson.split("\n").join("\n  ")},\n`;
   }
 
-  code += '} as const;\n\n';
+  code += "} as const;\n\n";
 
   return code;
 }
 
-function generateWrapperClass(className: string, schemas: SchemaInfo[], validationMode?: string): string {
+function generateWrapperClass(
+  className: string,
+  schemas: SchemaInfo[],
+  validationMode?: string,
+): string {
   return `
 // ============ Type-Safe Wrapper ============
 
@@ -148,7 +157,7 @@ export class ${className} {
   private initialized = false;
 
   constructor(existingInstance?: any) {
-    this.validationMode = '${validationMode || 'warning'}';
+    this.validationMode = '${validationMode || "warning"}';
 
     // Use provided instance or fallback to the module-level posthog
     this.posthogInstance = existingInstance || posthog;
@@ -292,7 +301,7 @@ function generateValidatorInitialization(schemas: SchemaInfo[]): string {
   // For simplicity, we'll use a basic validator
   // In production, you'd want to use AJV compiled validators
 
-  let code = '';
+  let code = "";
 
   for (const schema of schemas) {
     code += `    this.validators.set("${schema.eventName}", (data: any) => {
@@ -300,21 +309,27 @@ function generateValidatorInitialization(schemas: SchemaInfo[]): string {
       const schema = SCHEMAS["${schema.eventName}"];
 
       // Check required fields
-      ${schema.required.map(field => `
+      ${schema.required
+        .map(
+          (field) => `
       if (data?.${field} === undefined) {
         errors.push({ field: '${field}', message: 'Required field missing' });
-      }`).join('')}
+      }`,
+        )
+        .join("")}
 
       // Basic type checking (extend as needed)
-      ${Object.entries(schema.properties).map(([field, prop]: [string, any]) => {
-        if (prop.type === 'string' && prop.enum) {
-          return `
-      if (data?.${field} !== undefined && ![${prop.enum.map((v: string) => `'${v}'`).join(', ')}].includes(data.${field})) {
+      ${Object.entries(schema.properties)
+        .map(([field, prop]: [string, any]) => {
+          if (prop.type === "string" && prop.enum) {
+            return `
+      if (data?.${field} !== undefined && ![${prop.enum.map((v: string) => `'${v}'`).join(", ")}].includes(data.${field})) {
         errors.push({ field: '${field}', message: 'Invalid enum value' });
       }`;
-        }
-        return '';
-      }).join('')}
+          }
+          return "";
+        })
+        .join("")}
 
       return { valid: errors.length === 0, errors };
     });\n`;
@@ -323,7 +338,9 @@ function generateValidatorInitialization(schemas: SchemaInfo[]): string {
   return code;
 }
 
-async function loadAndProcessSchemas(patterns: string | string[]): Promise<SchemaInfo[]> {
+async function loadAndProcessSchemas(
+  patterns: string | string[],
+): Promise<SchemaInfo[]> {
   const schemaPatterns = Array.isArray(patterns) ? patterns : [patterns];
   const schemas: SchemaInfo[] = [];
 
@@ -331,7 +348,7 @@ async function loadAndProcessSchemas(patterns: string | string[]): Promise<Schem
     const files = await glob(pattern);
 
     for (const file of files) {
-      const content = JSON.parse(fs.readFileSync(file, 'utf-8'));
+      const content = JSON.parse(fs.readFileSync(file, "utf-8"));
 
       if (content.events) {
         for (const [eventName, eventSchema] of Object.entries(content.events)) {
@@ -342,7 +359,7 @@ async function loadAndProcessSchemas(patterns: string | string[]): Promise<Schem
             interfaceName: eventNameToInterface(eventName),
             schema: resolved,
             properties: resolved.properties || {},
-            required: resolved.required || []
+            required: resolved.required || [],
           });
         }
       }
@@ -353,30 +370,35 @@ async function loadAndProcessSchemas(patterns: string | string[]): Promise<Schem
 }
 
 function eventNameToInterface(eventName: string): string {
-  return eventName
-    .split(/[_-]/)
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('') + 'Properties';
+  return (
+    eventName
+      .split(/[_-]/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join("") + "Properties"
+  );
 }
 
 function resolveSchema(schema: any, rootSchema: any, filePath: string): any {
   if (!schema) return schema;
 
   if (schema.$ref) {
-    if (schema.$ref.startsWith('#/')) {
-      const refPath = schema.$ref.substring(2).split('/');
+    if (schema.$ref.startsWith("#/")) {
+      const refPath = schema.$ref.substring(2).split("/");
       let resolved = rootSchema;
       for (const part of refPath) {
         resolved = resolved[part];
       }
       return resolveSchema(resolved, rootSchema, filePath);
-    } else if (schema.$ref.startsWith('./')) {
-      const refFile = path.resolve(path.dirname(filePath), schema.$ref.split('#')[0]);
-      const refContent = JSON.parse(fs.readFileSync(refFile, 'utf-8'));
-      const fragment = schema.$ref.split('#')[1];
+    } else if (schema.$ref.startsWith("./")) {
+      const refFile = path.resolve(
+        path.dirname(filePath),
+        schema.$ref.split("#")[0],
+      );
+      const refContent = JSON.parse(fs.readFileSync(refFile, "utf-8"));
+      const fragment = schema.$ref.split("#")[1];
 
       if (fragment) {
-        const refPath = fragment.substring(1).split('/');
+        const refPath = fragment.substring(1).split("/");
         let resolved = refContent;
         for (const part of refPath) {
           resolved = resolved[part];
@@ -389,7 +411,7 @@ function resolveSchema(schema: any, rootSchema: any, filePath: string): any {
   }
 
   if (schema.allOf) {
-    const merged: any = { type: 'object', properties: {}, required: [] };
+    const merged: any = { type: "object", properties: {}, required: [] };
 
     for (const subSchema of schema.allOf) {
       const resolved = resolveSchema(subSchema, rootSchema, filePath);
@@ -415,41 +437,41 @@ function resolveSchema(schema: any, rootSchema: any, filePath: string): any {
 }
 
 function jsonSchemaToTsType(schema: any): string {
-  if (!schema) return 'any';
+  if (!schema) return "any";
 
   switch (schema.type) {
-    case 'string':
+    case "string":
       if (schema.enum) {
-        return schema.enum.map((v: string) => `'${v}'`).join(' | ');
+        return schema.enum.map((v: string) => `'${v}'`).join(" | ");
       }
-      return 'string';
+      return "string";
 
-    case 'number':
-    case 'integer':
-      return 'number';
+    case "number":
+    case "integer":
+      return "number";
 
-    case 'boolean':
-      return 'boolean';
+    case "boolean":
+      return "boolean";
 
-    case 'object':
+    case "object":
       if (schema.additionalProperties) {
-        return 'Record<string, any>';
+        return "Record<string, any>";
       }
       if (schema.properties) {
         const props = Object.entries(schema.properties)
           .map(([key, value]) => `${key}?: ${jsonSchemaToTsType(value)}`)
-          .join('; ');
+          .join("; ");
         return `{ ${props} }`;
       }
-      return 'Record<string, any>';
+      return "Record<string, any>";
 
-    case 'array':
+    case "array":
       if (schema.items) {
         return `${jsonSchemaToTsType(schema.items)}[]`;
       }
-      return 'any[]';
+      return "any[]";
 
     default:
-      return 'any';
+      return "any";
   }
 }

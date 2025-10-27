@@ -4,19 +4,19 @@ Code generator for HogTyped Python wrapper.
 Generates a Python module with embedded schemas and type hints.
 """
 
+import glob as glob_module
 import json
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime
-import glob as glob_module
 
 
 def generate_wrapper(
     schemas: str,
     output: str = "./posthog_generated.py",
     class_name: str = "PostHog",
-    validation_mode: str = "warning"
+    validation_mode: str = "warning",
 ) -> None:
     """
     Generate a Python wrapper with embedded schemas and type hints.
@@ -53,22 +53,24 @@ def load_schemas(pattern: str) -> List[Dict[str, Any]]:
     schemas = []
 
     for file_path in schema_files:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             content = json.load(f)
 
-        if 'events' in content:
-            for event_name, event_schema in content['events'].items():
+        if "events" in content:
+            for event_name, event_schema in content["events"].items():
                 resolved = resolve_refs(event_schema, content, file_path)
-                schemas.append({
-                    'event_name': event_name,
-                    'type_name': event_name_to_type(event_name),
-                    'schema': resolved,
-                    'properties': resolved.get('properties', {}),
-                    'required': resolved.get('required', [])
-                })
+                schemas.append(
+                    {
+                        "event_name": event_name,
+                        "type_name": event_name_to_type(event_name),
+                        "schema": resolved,
+                        "properties": resolved.get("properties", {}),
+                        "required": resolved.get("required", []),
+                    }
+                )
 
     # Sort schemas by event name in reverse for consistent output (matches test expectation)
-    return sorted(schemas, key=lambda x: x['event_name'], reverse=True)
+    return sorted(schemas, key=lambda x: x["event_name"], reverse=True)
 
 
 def resolve_refs(schema: Any, root_schema: Dict, file_path: str) -> Any:
@@ -77,51 +79,59 @@ def resolve_refs(schema: Any, root_schema: Dict, file_path: str) -> Any:
         return schema
 
     if isinstance(schema, dict):
-        if '$ref' in schema:
-            ref = schema['$ref']
+        if "$ref" in schema:
+            ref = schema["$ref"]
 
-            if ref.startswith('#/'):
+            if ref.startswith("#/"):
                 # Internal reference
-                ref_path = ref[2:].split('/')
-                resolved = root_schema
+                ref_path = ref[2:].split("/")
+                resolved: Any = root_schema
                 for part in ref_path:
-                    resolved = resolved.get(part)
+                    if isinstance(resolved, dict):
+                        resolved = resolved.get(part)
                     if resolved is None:
                         break
                 return resolve_refs(resolved, root_schema, file_path)
 
-            elif ref.startswith('./'):
+            elif ref.startswith("./"):
                 # External file reference
-                ref_parts = ref.split('#')
+                ref_parts = ref.split("#")
                 ref_file = Path(file_path).parent / ref_parts[0]
 
-                with open(ref_file, 'r') as f:
+                with open(ref_file, "r") as f:
                     ref_content = json.load(f)
 
                 if len(ref_parts) > 1 and ref_parts[1]:
-                    ref_fragment = ref_parts[1][1:].split('/')
-                    resolved = ref_content
+                    ref_fragment = ref_parts[1][1:].split("/")
+                    resolved_ref: Any = ref_content
                     for part in ref_fragment:
-                        resolved = resolved.get(part)
-                    return resolve_refs(resolved, ref_content, str(ref_file))
+                        if isinstance(resolved_ref, dict):
+                            resolved_ref = resolved_ref.get(part)
+                    return resolve_refs(resolved_ref, ref_content, str(ref_file))
 
                 return ref_content
 
-        elif 'allOf' in schema:
+        elif "allOf" in schema:
             # Merge allOf schemas
-            merged = {'type': 'object', 'properties': {}, 'required': []}
+            merged: Dict[str, Any] = {"type": "object", "properties": {}, "required": []}
 
-            for sub_schema in schema['allOf']:
+            for sub_schema in schema["allOf"]:
                 resolved = resolve_refs(sub_schema, root_schema, file_path)
 
                 if isinstance(resolved, dict):
-                    merged['properties'].update(resolved.get('properties', {}))
-                    merged['required'].extend(resolved.get('required', []))
+                    properties = merged.get("properties", {})
+                    required = merged.get("required", [])
+                    if isinstance(properties, dict):
+                        properties.update(resolved.get("properties", {}))
+                    if isinstance(required, list):
+                        required.extend(resolved.get("required", []))
 
-                    if 'additionalProperties' in resolved:
-                        merged['additionalProperties'] = resolved['additionalProperties']
+                    if "additionalProperties" in resolved:
+                        merged["additionalProperties"] = resolved["additionalProperties"]
 
-            merged['required'] = list(set(merged['required']))
+            required_list = merged.get("required", [])
+            if isinstance(required_list, list):
+                merged["required"] = list(set(required_list))
             return merged
 
         else:
@@ -136,64 +146,68 @@ def resolve_refs(schema: Any, root_schema: Dict, file_path: str) -> Any:
 
 def event_name_to_type(event_name: str) -> str:
     """Convert event name to Python type name."""
-    parts = event_name.replace('-', '_').split('_')
-    return ''.join(word.capitalize() for word in parts) + 'Properties'
+    parts = event_name.replace("-", "_").split("_")
+    return "".join(word.capitalize() for word in parts) + "Properties"
 
 
 def json_schema_to_python_type(schema: Any) -> str:
     """Convert JSON schema type to Python type hint."""
     if not schema:
-        return 'Any'
+        return "Any"
 
-    schema_type = schema.get('type')
+    schema_type = schema.get("type")
 
-    if schema_type == 'string':
-        if schema.get('enum'):
-            return 'Literal[' + ', '.join(f'"{v}"' for v in schema['enum']) + ']'
-        return 'str'
+    if schema_type == "string":
+        if schema.get("enum"):
+            return "Literal[" + ", ".join(f'"{v}"' for v in schema["enum"]) + "]"
+        return "str"
 
-    elif schema_type == 'number':
-        return 'float'
+    elif schema_type == "number":
+        return "float"
 
-    elif schema_type == 'integer':
-        return 'int'
+    elif schema_type == "integer":
+        return "int"
 
-    elif schema_type == 'boolean':
-        return 'bool'
+    elif schema_type == "boolean":
+        return "bool"
 
-    elif schema_type == 'array':
-        items_type = json_schema_to_python_type(schema.get('items', {}))
-        return f'List[{items_type}]'
+    elif schema_type == "array":
+        items_type = json_schema_to_python_type(schema.get("items", {}))
+        return f"List[{items_type}]"
 
-    elif schema_type == 'object':
-        if schema.get('additionalProperties'):
-            return 'Dict[str, Any]'
+    elif schema_type == "object":
+        if schema.get("additionalProperties"):
+            return "Dict[str, Any]"
 
-        if schema.get('properties'):
+        if schema.get("properties"):
             # For complex objects, use Dict for now
             # Could generate TypedDict for better typing
-            return 'Dict[str, Any]'
+            return "Dict[str, Any]"
 
-        return 'Dict[str, Any]'
+        return "Dict[str, Any]"
 
-    return 'Any'
+    return "Any"
 
 
 def json_to_python_literal(obj):
     """Convert JSON object to Python literal string."""
     import json
     import re
+
     # Convert to JSON string then replace JSON literals with Python literals
     json_str = json.dumps(obj, indent=8)
-    json_str = json_str.replace('true', 'True')
-    json_str = json_str.replace('false', 'False')
-    json_str = json_str.replace('null', 'None')
+    json_str = json_str.replace("true", "True")
+    json_str = json_str.replace("false", "False")
+    json_str = json_str.replace("null", "None")
 
     # Keep simple arrays on single lines for readability
     # This regex collapses arrays that don't contain nested structures
-    json_str = re.sub(r'\[\s+([^\[\{\]]+?)\s+\]',
-                      lambda m: '[' + re.sub(r'\s+', ' ', m.group(1)).strip() + ']',
-                      json_str, flags=re.DOTALL)
+    json_str = re.sub(
+        r"\[\s+([^\[\{\]]+?)\s+\]",
+        lambda m: "[" + re.sub(r"\s+", " ", m.group(1)).strip() + "]",
+        json_str,
+        flags=re.DOTALL,
+    )
 
     return json_str
 
@@ -219,7 +233,9 @@ class ValidationMode(Enum):
     DISABLED = "disabled"
 
 
-""".format(timestamp=datetime.now().isoformat())
+""".format(
+        timestamp=datetime.now().isoformat()
+    )
 
     # Generate TypedDict classes for each event
     typed_dicts = "# ============ Event Types ============\n\n"
@@ -228,21 +244,21 @@ class ValidationMode(Enum):
         typed_dicts += f"class {schema['type_name']}(TypedDict"
 
         # Add total=False if not all properties are required
-        has_optional = len(schema['properties']) > len(schema['required'])
+        has_optional = len(schema["properties"]) > len(schema["required"])
         if has_optional:
             typed_dicts += ", total=False"
 
         typed_dicts += "):\n"
 
-        if not schema['properties']:
+        if not schema["properties"]:
             typed_dicts += "    pass\n\n"
             continue
 
-        for prop_name, prop_schema in schema['properties'].items():
-            is_required = prop_name in schema['required']
+        for prop_name, prop_schema in schema["properties"].items():
+            is_required = prop_name in schema["required"]
             prop_type = json_schema_to_python_type(prop_schema)
 
-            description = prop_schema.get('description', '')
+            description = prop_schema.get("description", "")
             if description:
                 typed_dicts += f'    """{description}"""\n'
 
@@ -332,7 +348,7 @@ class {class_name}:
     capture_methods = ""
 
     for schema in schemas:
-        capture_methods += f'''
+        capture_methods += f"""
     @overload
     def capture(
         self,
@@ -341,7 +357,7 @@ class {class_name}:
         properties: {schema['type_name']},
         **kwargs
     ) -> None: ...
-'''
+"""
 
     capture_methods += f'''
     def capture(
@@ -418,11 +434,18 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Generate PostHog wrapper with embedded schemas")
-    parser.add_argument("-s", "--schemas", default="./schemas/*.schema.json", help="Schema file pattern")
+    parser.add_argument(
+        "-s", "--schemas", default="./schemas/*.schema.json", help="Schema file pattern"
+    )
     parser.add_argument("-o", "--output", default="./posthog_generated.py", help="Output file path")
     parser.add_argument("-c", "--class-name", default="PostHog", help="Generated class name")
-    parser.add_argument("-m", "--mode", default="warning", choices=["strict", "warning", "disabled"],
-                       help="Default validation mode")
+    parser.add_argument(
+        "-m",
+        "--mode",
+        default="warning",
+        choices=["strict", "warning", "disabled"],
+        help="Default validation mode",
+    )
 
     args = parser.parse_args()
 
@@ -430,5 +453,5 @@ if __name__ == "__main__":
         schemas=args.schemas,
         output=args.output,
         class_name=args.class_name,
-        validation_mode=args.mode
+        validation_mode=args.mode,
     )

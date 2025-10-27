@@ -26,8 +26,8 @@
  * ```
  */
 
-export { generateWrapper } from './codegen/generate-wrapper';
-export { ValidationMode } from './types';
+export { generateWrapper } from "./codegen/generate-wrapper";
+export { ValidationMode } from "./types";
 
 // Re-export types for convenience
-export type { HogTypedOptions, ValidationResult } from './types';
+export type { HogTypedOptions, ValidationResult } from "./types";

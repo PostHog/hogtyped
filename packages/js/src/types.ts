@@ -3,14 +3,14 @@
  */
 
 export enum ValidationMode {
-  STRICT = 'strict',
-  WARNING = 'warning',
-  DISABLED = 'disabled'
+  STRICT = "strict",
+  WARNING = "warning",
+  DISABLED = "disabled",
 }
 
 export interface HogTypedOptions {
   validationMode?: ValidationMode;
-  environment?: 'development' | 'production' | 'test';
+  environment?: "development" | "production" | "test";
 }
 
 export interface ValidationResult {
