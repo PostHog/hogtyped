@@ -85,17 +85,88 @@ This document tracks technical tasks, improvements, and known issues for HogType
   - Suggest fixes for common mistakes
   - Pretty-print validation errors
 
+### Multi-Language Support
+- [ ] **Architecture for multi-language code generation**
+  - Design intermediate representation (IR) for schemas
+  - Abstract syntax tree (AST) for language-agnostic code model
+  - Language-specific code emitters/generators
+  - Shared validation logic across all languages
+  - Plugin system for community-contributed languages
+
+- [ ] **Go (Golang) implementation**
+  - Generate Go structs with JSON tags
+  - Type-safe event capture functions
+  - PostHog Go SDK integration
+  - Go modules package management
+  - Example for Go web services (net/http, gin, echo)
+  - Location: Create `packages/go/` directory
+
+- [ ] **Java/JVM implementation**
+  - Generate Java classes with builder patterns
+  - Kotlin data class support
+  - Type-safe event capture methods
+  - Maven and Gradle integration
+  - Spring Boot integration example
+  - Location: Create `packages/java/` directory
+
+- [ ] **Ruby implementation**
+  - Generate Ruby classes with attr_accessor
+  - Type validation using dry-schema or similar
+  - PostHog Ruby SDK integration
+  - Gem package distribution
+  - Rails integration example
+  - Location: Create `packages/ruby/` directory
+
+- [ ] **PHP implementation**
+  - Generate PHP 8+ classes with typed properties
+  - Type hints and return type declarations
+  - PostHog PHP SDK integration
+  - Composer package distribution
+  - Laravel and Symfony integration examples
+  - Location: Create `packages/php/` directory
+
+- [ ] **C# / .NET implementation**
+  - Generate C# classes with properties
+  - Full .NET type system support
+  - NuGet package distribution
+  - ASP.NET Core integration example
+  - Unity game engine example
+  - Location: Create `packages/dotnet/` directory
+
+- [ ] **Rust implementation**
+  - Generate Rust structs with derive macros (Serialize, Deserialize)
+  - Strong type safety with ownership model
+  - Cargo package distribution
+  - Integration with Actix/Rocket frameworks
+  - Location: Create `packages/rust/` directory
+
+- [ ] **Cross-language testing framework**
+  - Automated tests for each language implementation
+  - Validation consistency tests across languages
+  - Performance benchmarking per language
+  - Schema compatibility matrix
+
+- [ ] **Package distribution for all languages**
+  - npm (TypeScript/JavaScript) ✅
+  - PyPI (Python) ✅
+  - pkg.go.dev (Go)
+  - Maven Central (Java)
+  - RubyGems (Ruby)
+  - Packagist (PHP)
+  - NuGet (.NET)
+  - crates.io (Rust)
+
 ### Documentation
 - [ ] **API Reference Documentation**
   - Document all CLI commands and options
   - Document generated wrapper API surface
   - Document validation modes in detail
-  - Include TypeScript/Python API differences
+  - Include language-specific API differences (TypeScript/Python/Go/Java/etc.)
 
 - [ ] **Troubleshooting Guide**
   - Common issues and solutions
   - Schema design mistakes
-  - TypeScript/Python specific issues
+  - Language-specific issues
   - PostHog integration problems
 
 - [ ] **Schema Design Best Practices**
@@ -256,10 +327,18 @@ This document tracks technical tasks, improvements, and known issues for HogType
   - HMR support for React/Vue
   - Dynamic schema updates
 
-- [ ] **Multi-language support**
-  - Generate wrappers for other languages
-  - Consider: Go, Rust, Java, Swift
-  - Modular generation architecture
+- [ ] **Additional niche language support**
+  - Swift (iOS/macOS) - covered in High Priority but may be lower priority
+  - Kotlin (Android) - covered in High Priority but may be lower priority
+  - Dart (Flutter) - covered in High Priority but may be lower priority
+  - Scala (functional JVM)
+  - Elixir (functional, Erlang VM)
+  - Clojure (functional, JVM)
+  - Haskell (pure functional)
+  - OCaml/ReasonML (type-safe functional)
+  - Zig (systems programming)
+  - Nim (compiled, Python-like syntax)
+  - See High Priority > Multi-Language Support for core languages (Go, Java, Ruby, PHP, C#, Rust)
 
 ### Developer Tools
 - [ ] **VS Code extension**

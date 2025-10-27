@@ -10,7 +10,7 @@ HogTyped transforms the PostHog analytics experience by:
 - **Type Safety**: Catch analytics bugs at compile time, not in production
 - **Schema-First**: Single source of truth for event definitions across teams
 - **Zero Runtime Overhead**: All schemas embedded at build time
-- **Multi-Language**: Consistent experience across TypeScript and Python
+- **Multi-Language**: Support for TypeScript, Python, Go, Java, Ruby, PHP, and more
 - **Developer-Friendly**: Familiar patterns, great IDE support, minimal configuration
 
 ## Current State (v0.1.0)
@@ -139,9 +139,146 @@ HogTyped transforms the PostHog analytics experience by:
 
 ---
 
-## Milestone 3: Scale & Performance (v0.4.0)
+## Milestone 3: Multi-Language Support (v0.4.0)
 
 **Target: Q3 2025**
+**Goal: Expand to support major programming languages**
+
+### Deliverables
+
+#### Priority 1 Languages (Core Target)
+- [ ] **Go (Golang)** - High-performance backend services
+  - Go structs with JSON tags
+  - Type-safe event capture
+  - PostHog Go SDK integration
+  - Package management via Go modules
+
+- [ ] **Java/JVM** - Enterprise backend applications
+  - Java classes with builder patterns
+  - Kotlin support with data classes
+  - Type-safe event capture
+  - Maven/Gradle integration
+  - Spring Boot examples
+
+- [ ] **Ruby** - Web applications (Rails, Sinatra)
+  - Ruby classes with attr_accessor
+  - Type validation with dry-schema
+  - PostHog Ruby SDK integration
+  - Gem package distribution
+  - Rails integration examples
+
+- [ ] **PHP** - Web applications (Laravel, Symfony)
+  - PHP 8+ classes with typed properties
+  - Type hints and return types
+  - PostHog PHP SDK integration
+  - Composer package distribution
+  - Laravel/Symfony examples
+
+#### Priority 2 Languages (High Demand)
+- [ ] **C# / .NET** - Enterprise applications, Unity games
+  - C# classes with properties
+  - .NET type system integration
+  - NuGet package distribution
+  - ASP.NET Core examples
+
+- [ ] **Rust** - Systems programming, high-performance
+  - Rust structs with derive macros
+  - Strong type safety with ownership
+  - Cargo package distribution
+  - Actix/Rocket web framework examples
+
+#### Priority 3 Languages (Emerging)
+- [ ] **Swift** - iOS/macOS applications
+  - Swift structs with Codable
+  - Type-safe capture for mobile
+  - Swift Package Manager
+  - SwiftUI examples
+
+- [ ] **Kotlin** - Android applications (if not covered by JVM)
+  - Kotlin data classes
+  - Coroutines support
+  - Android examples
+
+- [ ] **Dart** - Flutter mobile applications
+  - Dart classes with JSON serialization
+  - Flutter integration
+  - pub.dev package distribution
+
+- [ ] **Scala** - Functional JVM applications
+  - Case classes
+  - Functional patterns
+  - sbt integration
+
+#### Language Implementation Framework
+- [ ] **Modular code generator architecture**
+  - Abstract syntax tree (AST) for intermediate representation
+  - Language-specific code emitters
+  - Shared validation logic across languages
+  - Plugin system for community languages
+
+- [ ] **Language testing matrix**
+  - Automated tests for each language
+  - Cross-language validation consistency
+  - Performance benchmarking per language
+  - Documentation generation per language
+
+- [ ] **Package distribution**
+  - npm (TypeScript/JavaScript)
+  - PyPI (Python)
+  - pkg.go.dev (Go)
+  - Maven Central (Java)
+  - RubyGems (Ruby)
+  - Packagist (PHP)
+  - NuGet (.NET)
+  - crates.io (Rust)
+  - And others as needed
+
+#### Performance
+- [ ] Tree-shaking optimization for minimal bundle size
+- [ ] Code minification option
+- [ ] Schema deduplication for multi-event apps
+- [ ] Lazy loading for validation logic
+- [ ] Performance benchmarks and monitoring
+
+#### Large-Scale Features
+- [ ] Support 1000+ event types
+- [ ] Incremental code generation
+- [ ] Parallel schema processing
+- [ ] Schema registry integration
+- [ ] Remote schema fetching with caching
+
+#### Enterprise Features
+- [ ] Schema versioning and migration support
+- [ ] Multi-environment configurations
+- [ ] Schema governance and validation rules
+- [ ] Audit logging for schema changes
+- [ ] Team collaboration features
+
+#### Advanced Validation
+- [ ] Custom validator plugins
+- [ ] Async validation support
+- [ ] Validation performance optimization
+- [ ] Conditional validation rules
+
+#### Monitoring & Debugging
+- [ ] Schema coverage metrics
+- [ ] Validation error analytics
+- [ ] Dead code detection for unused events
+- [ ] Event usage statistics
+
+### Success Metrics
+- ✅ 6+ languages supported (TypeScript, Python, Go, Java, Ruby, PHP minimum)
+- ✅ All languages have passing test suites
+- ✅ Package published to respective registries
+- ✅ Examples for each language
+- ✅ 50+ production users across multiple languages
+- ✅ 5+ enterprise customers
+
+---
+
+## Milestone 4: Scale & Performance (v0.5.0)
+
+**Target: Q4 2025**
 **Goal: Support large teams and enterprise use cases**
 
 ### Deliverables
@@ -183,14 +320,14 @@ HogTyped transforms the PostHog analytics experience by:
 - ✅ Support apps with 500+ event types
 - ✅ Bundle size <50KB for typical app
 - ✅ Generation time <1s for 100 schemas
-- ✅ 50+ production users
-- ✅ 5+ enterprise customers
+- ✅ 100+ production users
+- ✅ 10+ enterprise customers
 
 ---
 
-## Milestone 4: Ecosystem & Integrations (v0.5.0)
+## Milestone 5: Ecosystem & Integrations (v0.6.0)
 
-**Target: Q4 2025**
+**Target: Q1 2026**
 **Goal: Rich ecosystem and seamless integrations**
 
 ### Deliverables
@@ -202,12 +339,13 @@ HogTyped transforms the PostHog analytics experience by:
 - [ ] TypeBox integration
 - [ ] Zod integration
 
-#### Language Support
-- [ ] Go implementation
-- [ ] Rust implementation
-- [ ] Java/Kotlin implementation
-- [ ] Swift implementation (iOS)
-- [ ] Dart implementation (Flutter)
+#### Additional Language Support
+- [ ] Elixir (functional, Erlang VM)
+- [ ] Clojure (functional, JVM)
+- [ ] Haskell (pure functional)
+- [ ] OCaml/ReasonML (type-safe functional)
+- [ ] Zig (systems programming)
+- [ ] Nim (compiled, Python-like syntax)
 
 #### IDE Extensions
 - [ ] VS Code extension
@@ -239,17 +377,17 @@ HogTyped transforms the PostHog analytics experience by:
 - [ ] Community forum/Discord
 
 ### Success Metrics
-- ✅ 3+ additional language implementations
+- ✅ 3+ additional niche language implementations
 - ✅ VS Code extension with 1000+ installs
 - ✅ 10+ community plugins
-- ✅ 100+ production users
+- ✅ 200+ production users
 - ✅ Active community forum
 
 ---
 
-## Milestone 5: Advanced Features (v1.0.0)
+## Milestone 6: Advanced Features (v1.0.0)
 
-**Target: Q1 2026**
+**Target: Q2 2026**
 **Goal: Feature-complete, battle-tested v1.0 release**
 
 ### Deliverables
@@ -358,8 +496,9 @@ HogTyped transforms the PostHog analytics experience by:
 ### Adoption Metrics
 - **v0.2.0**: 10 production users
 - **v0.3.0**: 50 production users
-- **v0.4.0**: 100 production users
-- **v0.5.0**: 500 production users
+- **v0.4.0**: 100 production users (multi-language launch)
+- **v0.5.0**: 200 production users
+- **v0.6.0**: 500 production users
 - **v1.0.0**: 1000+ production users
 
 ### Community Metrics
@@ -380,8 +519,8 @@ HogTyped transforms the PostHog analytics experience by:
 ### Unique Value Proposition
 1. **Zero Runtime Overhead**: Schemas embedded at build time
 2. **True Type Safety**: Not just wrappers, actual type inference
-3. **Multi-Language**: Consistent DX across TypeScript and Python
-4. **Schema-First**: Single source of truth across engineering
+3. **Multi-Language**: Support for 6+ major languages with consistent DX
+4. **Schema-First**: Single source of truth across engineering and platforms
 5. **PostHog Native**: Built specifically for PostHog, not generic
 
 ### Market Differentiation
