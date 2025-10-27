@@ -5,10 +5,10 @@ This document tracks technical tasks, improvements, and known issues for HogType
 ## Critical Issues
 
 ### Python Package
-- [ ] **Fix CLI test failures** (4/8 tests failing in `tests/test_cli.py`)
-  - Init command not creating schemas directory properly
-  - Generate command tests failing due to module import issues
-  - Need proper PYTHONPATH configuration in test environment
+- [x] **Fix CLI test failures** ✅ FIXED - all 21 tests passing
+  - Fixed by adding PYTHONPATH configuration in test environment
+  - Replaced deprecated setup.py with modern pyproject.toml
+  - All 21 Python tests now pass (6 CLI + 15 codegen)
   - Location: `packages/python/tests/test_cli.py`
 
 ### Validation System
