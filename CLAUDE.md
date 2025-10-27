@@ -108,3 +108,104 @@ HogTyped is a code generation tool that creates type-safe PostHog analytics wrap
 - Integration tests for CLI commands
 - Test fixtures with various schema complexities
 - Coverage targets for both packages
+
+## Debugging & Troubleshooting
+
+### Python Package Installation Issues
+
+The Python package may have installation issues in some environments due to deprecated `setup.py` patterns. When debugging or running tests:
+
+**Problem**: `pip install -e .` fails with `AttributeError: install_layout`
+**Solution**: Tests are designed to work without package installation by using PYTHONPATH
+
+**Running Tests Without Installation**:
+```bash
+cd packages/python
+# Install pytest dependencies only
+python -m pip install pytest pytest-cov
+
+# Run tests directly - they set PYTHONPATH automatically
+python -m pytest tests/
+```
+
+**How Tests Work**:
+- Tests in `tests/test_cli.py` set up PYTHONPATH in `setup_class()` to point to the package directory
+- This allows `python -m hogtyped` to work in subprocess calls without installing the package
+- The PYTHONPATH environment is passed to all subprocess.run() calls via the `env` parameter
+
+### Python CLI Testing Pattern
+
+When testing CLI commands that spawn subprocesses:
+
+```python
+# In test setup
+@classmethod
+def setup_class(cls):
+    cls.package_dir = Path(__file__).parent.parent
+    cls.env = os.environ.copy()
+    pythonpath = str(cls.package_dir)
+    if 'PYTHONPATH' in cls.env:
+        cls.env['PYTHONPATH'] = f"{pythonpath}:{cls.env['PYTHONPATH']}"
+    else:
+        cls.env['PYTHONPATH'] = pythonpath
+
+# In test methods
+result = subprocess.run(
+    [sys.executable, "-m", "hogtyped", "command"],
+    env=self.env,  # Important: pass environment with PYTHONPATH
+    capture_output=True,
+    text=True
+)
+```
+
+### Common Test Failures
+
+1. **"No module named hogtyped"**
+   - Cause: subprocess.run() doesn't have PYTHONPATH set
+   - Fix: Add `env=self.env` to subprocess.run() call
+
+2. **Init command not creating directories**
+   - Cause: Command failing before directory creation (often due to import errors)
+   - Debug: Check stderr output from subprocess result
+   - Fix: Ensure PYTHONPATH is set in environment
+
+3. **Generated code import errors**
+   - Expected: Tests should handle PostHog import errors gracefully
+   - The generated code tries to import 'posthog' which may not be installed
+   - Tests should only fail on unexpected import errors
+
+### Debugging Workflow
+
+When tests fail:
+
+1. **Run tests with verbose output**:
+   ```bash
+   python -m pytest tests/test_cli.py -v --tb=short
+   ```
+
+2. **Check stderr from subprocess calls**:
+   ```python
+   result = subprocess.run(...)
+   print("STDOUT:", result.stdout)
+   print("STDERR:", result.stderr)
+   print("Return code:", result.returncode)
+   ```
+
+3. **Test CLI manually with PYTHONPATH**:
+   ```bash
+   cd packages/python
+   PYTHONPATH=. python -m hogtyped --help
+   PYTHONPATH=. python -m hogtyped init
+   ```
+
+4. **Verify package structure**:
+   ```bash
+   python -c "import sys; sys.path.insert(0, '.'); import hogtyped; print('OK')"
+   ```
+
+### Success Criteria for Python Tests
+
+- All 21 tests should pass (6 CLI tests + 15 codegen tests)
+- Tests should run without requiring package installation
+- Tests should complete in under 5 seconds
+- No warnings about missing modules (except expected posthog import in generated code)

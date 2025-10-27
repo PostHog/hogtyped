@@ -19,6 +19,15 @@ class TestPythonCLI:
         """Set up test environment"""
         cls.test_output_dir = Path(tempfile.mkdtemp())
 
+        # Set up PYTHONPATH to include the package directory
+        cls.package_dir = Path(__file__).parent.parent
+        cls.env = os.environ.copy()
+        pythonpath = str(cls.package_dir)
+        if 'PYTHONPATH' in cls.env:
+            cls.env['PYTHONPATH'] = f"{pythonpath}:{cls.env['PYTHONPATH']}"
+        else:
+            cls.env['PYTHONPATH'] = pythonpath
+
     @classmethod
     def teardown_class(cls):
         """Clean up test output"""
@@ -30,7 +39,8 @@ class TestPythonCLI:
         result = subprocess.run(
             [sys.executable, "-m", "hogtyped", "--help"],
             capture_output=True,
-            text=True
+            text=True,
+            env=self.env
         )
 
         assert result.returncode == 0
@@ -44,7 +54,8 @@ class TestPythonCLI:
             [sys.executable, "-m", "hogtyped", "init"],
             cwd=str(self.test_output_dir),
             capture_output=True,
-            text=True
+            text=True,
+            env=self.env
         )
 
         # Check that schemas directory was created
@@ -68,7 +79,8 @@ class TestPythonCLI:
         subprocess.run(
             [sys.executable, "-m", "hogtyped", "init"],
             cwd=str(self.test_output_dir),
-            capture_output=True
+            capture_output=True,
+            env=self.env
         )
 
         # Then generate
@@ -76,7 +88,8 @@ class TestPythonCLI:
             [sys.executable, "-m", "hogtyped", "generate"],
             cwd=str(self.test_output_dir),
             capture_output=True,
-            text=True
+            text=True,
+            env=self.env
         )
 
         assert "Generated" in result.stdout
@@ -125,7 +138,8 @@ class TestPythonCLI:
             ],
             cwd=str(self.test_output_dir),
             capture_output=True,
-            text=True
+            text=True,
+            env=self.env
         )
 
         # Verify custom output
@@ -145,7 +159,8 @@ class TestPythonCLI:
             ],
             cwd=str(self.test_output_dir),
             capture_output=True,
-            text=True
+            text=True,
+            env=self.env
         )
 
         # Should not crash, should generate file
@@ -158,13 +173,15 @@ class TestPythonCLI:
         subprocess.run(
             [sys.executable, "-m", "hogtyped", "init"],
             cwd=str(self.test_output_dir),
-            capture_output=True
+            capture_output=True,
+            env=self.env
         )
 
         subprocess.run(
             [sys.executable, "-m", "hogtyped", "generate"],
             cwd=str(self.test_output_dir),
-            capture_output=True
+            capture_output=True,
+            env=self.env
         )
 
         # Try to import the generated module
