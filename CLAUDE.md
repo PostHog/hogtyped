@@ -209,3 +209,52 @@ When tests fail:
 - Tests should run without requiring package installation
 - Tests should complete in under 5 seconds
 - No warnings about missing modules (except expected posthog import in generated code)
+
+### Formatting and Type Checking
+
+**Python Formatting:**
+```bash
+cd packages/python
+# Check formatting
+black --check hogtyped/
+isort --check-only hogtyped/
+
+# Fix formatting
+black hogtyped/
+isort hogtyped/
+```
+
+**Python Type Checking:**
+```bash
+cd packages/python
+# Run mypy
+mypy hogtyped/ --ignore-missing-imports
+```
+
+**TypeScript Formatting:**
+```bash
+cd packages/js
+# Check formatting
+npx prettier --check "src/**/*.{ts,js,json}"
+
+# Fix formatting
+npx prettier --write "src/**/*.{ts,js,json}"
+```
+
+**Common Formatting/Type Issues:**
+
+1. **Mypy python_version compatibility**
+   - Mypy 1.0+ requires python_version to be 3.9 or higher in config
+   - Even though package supports Python 3.7+, mypy config needs 3.9+
+   - Set in pyproject.toml: `python_version = "3.9"`
+
+2. **Type annotation errors in Python**
+   - Use explicit type annotations when dict.get() is chained
+   - Example: `resolved: Any = root_schema` instead of implicit typing
+   - Check isinstance() before accessing dict methods
+   - Avoid variable name collisions across scopes
+
+3. **Formatting before commits**
+   - Always run black and isort on Python code
+   - Always run prettier on TypeScript code
+   - CI will fail if formatting is not applied
