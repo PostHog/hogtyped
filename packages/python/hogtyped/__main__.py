@@ -44,7 +44,7 @@ def main():
     )
 
     # Init command
-    init_parser = subparsers.add_parser("init", help="Initialize HogTyped in your project")
+    subparsers.add_parser("init", help="Initialize HogTyped in your project")
 
     args = parser.parse_args()
 
@@ -59,15 +59,15 @@ def main():
                 validation_mode=args.mode,
             )
 
-            print(f"\n📝 Next steps:")
-            print(f"1. Import your generated wrapper:")
-            print(f'   from {args.output[:-3].replace("/", ".")} import {args.class_name.lower()}')
-            print(f"\n2. Use it with full type hints:")
+            print("\n📝 Next steps:")
+            print("1. Import your generated wrapper:")
+            print(f"   from {args.output[:-3].replace('/', '.')} import {args.class_name.lower()}")
+            print("\n2. Use it with full type hints:")
             print(f"   {args.class_name.lower()}.capture(")
-            print(f'       distinct_id="user-123",')
-            print(f'       event="event_name",  # Type hints available!')
-            print(f"       properties={{...}}")
-            print(f"   )")
+            print('       distinct_id="user-123",')
+            print('       event="event_name",  # Type hints available!')
+            print("       properties={...}")
+            print("   )")
 
         except Exception as e:
             print(f"❌ Error generating wrapper: {e}", file=sys.stderr)

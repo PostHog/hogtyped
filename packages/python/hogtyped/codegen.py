@@ -6,10 +6,9 @@ Generates a Python module with embedded schemas and type hints.
 
 import glob as glob_module
 import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 def generate_wrapper(
@@ -43,8 +42,8 @@ def generate_wrapper(
 
     print(f"✅ Generated {class_name} wrapper at {output}")
     print(f"   - {len(schema_data)} events with full type hints")
-    print(f"   - Zero runtime schema loading")
-    print(f"   - Type checking with mypy/pyright")
+    print("   - Zero runtime schema loading")
+    print("   - Type checking with mypy/pyright")
 
 
 def load_schemas(pattern: str) -> List[Dict[str, Any]]:
