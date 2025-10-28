@@ -29,10 +29,10 @@ hogtyped.capture('button_clicked', {
 });
 
 // ❌ COMPILE ERROR: Wrong property type
-// @ts-expect-error - This will not compile!
 hogtyped.capture('button_clicked', {
   buttonId: 'submit-btn',
   page: '/checkout',
+  // @ts-expect-error - This will not compile!
   timestamp: 'not-a-number' // Should be number!
 });
 
