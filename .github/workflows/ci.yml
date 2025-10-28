@@ -153,7 +153,7 @@ jobs:
           cp test-schemas/*.json test-cross/
 
           cd test-cross
-          npx hogtyped generate -s "*.json" -o ts_output.ts
+          node ../packages/js/bin/hogtyped.js generate -s "*.json" -o ts_output.ts
           python -m hogtyped generate -s "*.json" -o py_output.py
 
           # Verify both generated files exist
