@@ -122,7 +122,7 @@ describe('CLI Tool', () => {
 
   test('should handle errors gracefully', () => {
     // Test with non-existent schema path
-    const result = execSync(
+    execSync(
       `node ${cliPath} generate --schemas "./nonexistent/*.json"`,
       {
         cwd: tempDir,
