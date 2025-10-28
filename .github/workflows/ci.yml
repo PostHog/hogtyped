@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [16, 18, 20]
+        node-version: [18, 20]
 
     steps:
       - name: Checkout code
@@ -198,7 +198,7 @@ jobs:
         run: |
           cd examples/node
           npm install
-          npx hogtyped generate -o lib/posthog.generated.js
+          node ../../packages/js/bin/hogtyped.js generate -o lib/posthog.generated.js
           node -c lib/posthog.generated.js
 
       - name: Test Python example
