@@ -255,7 +255,10 @@ class ValidationMode(Enum):
 
     # Generate event name type
     event_names = [f'"{s["event_name"]}"' for s in schemas]
-    typed_dicts += f"EventName = Literal[{', '.join(event_names)}]\n\n"
+    if event_names:
+        typed_dicts += f"EventName = Literal[{', '.join(event_names)}]\n\n"
+    else:
+        typed_dicts += "EventName = str  # No events defined yet\n\n"
 
     # Generate embedded schemas
     schemas_const = "# ============ Embedded Schemas ============\n\nSCHEMAS = {\n"
