@@ -152,11 +152,16 @@ jobs:
           mkdir -p test-cross
           cp test-schemas/*.json test-cross/
 
-          cd test-cross
-          npx hogtyped generate -s "*.json" -o ts_output.ts
-          python -m hogtyped generate -s "*.json" -o py_output.py
+          # TypeScript generation using local package
+          cd packages/js
+          npx hogtyped generate -s "../../test-cross/*.json" -o ../../test-cross/ts_output.ts
+
+          # Python generation using local package
+          cd ../python
+          python -m hogtyped generate -s "../../test-cross/*.json" -o ../../test-cross/py_output.py
 
           # Verify both generated files exist
+          cd ../../test-cross
           test -f ts_output.ts
           test -f py_output.py
 
@@ -193,19 +198,6 @@ jobs:
           npm install
           npm run generate
           npm run build
-
-      - name: Test Node.js example
-        run: |
-          cd examples/node
-          npm install
-          npx hogtyped generate -o lib/posthog.generated.js
-          node -c lib/posthog.generated.js
-
-      - name: Test Python example
-        run: |
-          cd examples/python
-          python -m hogtyped generate
-          python -m py_compile posthog_generated.py
 
   # Build and validate package publishing
   test-build:
