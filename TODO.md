@@ -5,10 +5,11 @@ This document tracks technical tasks, improvements, and known issues for HogType
 ## Critical Issues
 
 ### Python Package
-- [ ] **Fix CLI test failures** (4/8 tests failing in `tests/test_cli.py`)
-  - Init command not creating schemas directory properly
-  - Generate command tests failing due to module import issues
-  - Need proper PYTHONPATH configuration in test environment
+- [x] **Fix CLI test failures** ✅ (All tests now passing)
+  - ~~Init command not creating schemas directory properly~~
+  - ~~Generate command tests failing due to module import issues~~
+  - ~~Need proper PYTHONPATH configuration in test environment~~
+  - **Supported versions**: Python 3.9+, Node 20 and 22
   - Location: `packages/python/tests/test_cli.py`
 
 ### Validation System
@@ -414,4 +415,4 @@ This document tracks technical tasks, improvements, and known issues for HogType
 - [ ] Not started
 - [x] Completed
 
-Last updated: 2025-10-27
+Last updated: 2025-10-29
