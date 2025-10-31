@@ -52,6 +52,7 @@ coverage/
 *.lcov
 .pytest_cache/
 htmlcov/
+test-output/
 
 # Package manager files
 yarn.lock
