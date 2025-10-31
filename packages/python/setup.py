@@ -32,6 +32,7 @@ setup(
     python_requires=">=3.9",
     install_requires=[
         "posthog>=2.0.0",
+        "jsonschema>=4.0.0",
     ],
     extras_require={
         "dev": [

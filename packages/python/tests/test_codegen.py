@@ -176,11 +176,13 @@ class TestPythonCodeGenerator:
 
         generated_code = output_file.read_text()
 
-        # Check for validation method
+        # Check for jsonschema import
+        assert "from jsonschema import validate, ValidationError, FormatChecker" in generated_code
+
+        # Check for validation method using jsonschema
         assert "def _validate(self" in generated_code
-        assert "errors = []" in generated_code
-        assert "for field in schema.get('required', []):" in generated_code
-        assert "if field not in properties:" in generated_code
+        assert "validate(instance=properties, schema=schema, format_checker=FormatChecker())" in generated_code
+        assert "except ValidationError" in generated_code
 
         # Check for validation in capture method
         assert "errors = self._validate(event, properties)" in generated_code

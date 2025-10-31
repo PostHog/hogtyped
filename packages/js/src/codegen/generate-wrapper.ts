@@ -35,6 +35,9 @@ export async function generateWrapper(options: {
 // Generated at: ${new Date().toISOString()}
 // DO NOT EDIT - This file is auto-generated
 
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
 // Dynamic import for SSR compatibility
 let posthog: any;
 if (typeof window !== 'undefined') {
@@ -187,6 +190,14 @@ export class ${className} {
   }
 
   private initializeValidators() {
+    // Initialize AJV with comprehensive validation support
+    const ajv = new Ajv({
+      allErrors: true,
+      strict: false,
+      validateFormats: true
+    });
+    addFormats(ajv);
+
     ${generateValidatorInitialization(schemas)}
   }
 
@@ -289,34 +300,18 @@ export class ${className} {
 }
 
 function generateValidatorInitialization(schemas: SchemaInfo[]): string {
-  // For simplicity, we'll use a basic validator
-  // In production, you'd want to use AJV compiled validators
-
+  // Use AJV compiled validators for comprehensive JSON Schema validation
   let code = '';
 
   for (const schema of schemas) {
-    code += `    this.validators.set("${schema.eventName}", (data: any) => {
-      const errors: any[] = [];
-      const schema = SCHEMAS["${schema.eventName}"];
-
-      // Check required fields
-      ${schema.required.map(field => `
-      if (data?.${field} === undefined) {
-        errors.push({ field: '${field}', message: 'Required field missing' });
-      }`).join('')}
-
-      // Basic type checking (extend as needed)
-      ${Object.entries(schema.properties).map(([field, prop]: [string, any]) => {
-        if (prop.type === 'string' && prop.enum) {
-          return `
-      if (data?.${field} !== undefined && ![${prop.enum.map((v: string) => `'${v}'`).join(', ')}].includes(data.${field})) {
-        errors.push({ field: '${field}', message: 'Invalid enum value' });
-      }`;
-        }
-        return '';
-      }).join('')}
-
-      return { valid: errors.length === 0, errors };
+    code += `    // Compile validator for ${schema.eventName}
+    const validate_${schema.eventName.replace(/[^a-zA-Z0-9_]/g, '_')} = ajv.compile(SCHEMAS["${schema.eventName}"]);
+    this.validators.set("${schema.eventName}", (data: any) => {
+      const valid = validate_${schema.eventName.replace(/[^a-zA-Z0-9_]/g, '_')}(data);
+      return {
+        valid,
+        errors: validate_${schema.eventName.replace(/[^a-zA-Z0-9_]/g, '_')}.errors || []
+      };
     });\n`;
   }
 

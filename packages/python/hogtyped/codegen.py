@@ -211,6 +211,7 @@ from enum import Enum
 import posthog
 import json
 import warnings
+from jsonschema import validate, ValidationError, FormatChecker
 
 
 class ValidationMode(Enum):
@@ -304,7 +305,7 @@ class {class_name}:
         self.posthog = posthog_instance
 
     def _validate(self, event_name: str, properties: Dict[str, Any]) -> Optional[List[str]]:
-        """Validate event properties against schema."""
+        """Validate event properties against schema using jsonschema."""
         if self.validation_mode == ValidationMode.DISABLED:
             return None
 
@@ -312,23 +313,19 @@ class {class_name}:
         if not schema:
             return None
 
-        errors = []
-
-        # Check required fields
-        for field in schema.get('required', []):
-            if field not in properties:
-                errors.append(f"Missing required field: {{field}}")
-
-        # Basic type validation (extend as needed)
-        for field, value in properties.items():
-            if field in schema.get('properties', {{}}):
-                prop_schema = schema['properties'][field]
-
-                # Check enum values
-                if 'enum' in prop_schema and value not in prop_schema['enum']:
-                    errors.append(f"Invalid enum value for {{field}}: {{value}}")
-
-        return errors if errors else None
+        try:
+            # Use jsonschema for comprehensive validation
+            # FormatChecker enables format validation (email, uuid, date-time, etc.)
+            validate(instance=properties, schema=schema, format_checker=FormatChecker())
+            return None
+        except ValidationError as e:
+            # Convert validation errors to string list
+            errors = [str(e.message)]
+            # Include nested errors if any
+            if e.context:
+                for error in e.context:
+                    errors.append(str(error.message))
+            return errors
 '''
 
     # Generate overloaded capture methods for type safety
