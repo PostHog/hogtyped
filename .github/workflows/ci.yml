@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload coverage
         if: matrix.node-version == 20
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./packages/js/coverage/lcov.info
           flags: typescript
@@ -95,7 +95,7 @@ jobs:
 
       - name: Upload coverage
         if: matrix.python-version == '3.11'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./packages/python/coverage.xml
           flags: python
