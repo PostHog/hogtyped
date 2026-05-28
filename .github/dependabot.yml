@@ -2,6 +2,8 @@ version: 2
 updates:
   # TypeScript/JavaScript dependencies
   - package-ecosystem: "npm"
+    cooldown:
+      default-days: 7
     directory: "/packages/js"
     schedule:
       interval: "weekly"
@@ -14,6 +16,8 @@ updates:
 
   # Python dependencies
   - package-ecosystem: "pip"
+    cooldown:
+      default-days: 7
     directory: "/packages/python"
     schedule:
       interval: "weekly"
@@ -26,6 +30,8 @@ updates:
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
+    cooldown:
+      default-days: 7
     directory: "/"
     schedule:
       interval: "weekly"
