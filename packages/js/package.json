@@ -35,7 +35,7 @@
     "posthog-js": ">=1.0.0"
   },
   "dependencies": {
-    "commander": "^11.1.0",
+    "commander": "^14.0.3",
     "glob": "^11.0.3"
   },
   "devDependencies": {
